@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "app"
+version = "0.0.0"
+description = ""
+authors = []
+packages = [
+    { include = "*", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^2.2.1"
+flask = "^3.0.2"
+gunicorn = "^21.2.0"
+transformers = "^4.38.2"
+safetensors = "^0.4.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

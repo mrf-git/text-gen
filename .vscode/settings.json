@@ -1,0 +1,7 @@
+{
+    "git.ignoredRepositories": [
+        "${workspaceFolder}/base_image",
+        "${workspaceFolder}/base_image/models",
+        "${workspaceFolder}/base_image/models/TinyLlama-1.1B-Chat-v1.0"
+    ]
+}

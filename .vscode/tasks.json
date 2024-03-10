@@ -1,0 +1,66 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build venv",
+            "type": "shell",
+            "args": [
+                "install"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "command": "poetry"
+        },
+        {
+            "label": "Build base image",
+            "type": "shell",
+            "args": [
+                "build",
+                "-t", "text-gen-base:latest",
+                "."
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/base_image"
+            },
+            "group": "build",
+            "command": "docker",
+            "problemMatcher": []
+        },
+        {
+            "label": "Build image",
+            "type": "shell",
+            "args": [
+                "build",
+                "-t", "local-text-gen:latest",
+                "."
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "command": "docker",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run image",
+            "dependsOn": ["Build image"],
+            "dependsOrder": "sequence",
+            "type": "shell",
+            "args": [
+                "run",
+                "-it", "--rm",
+                "--gpus=all",
+                "-p", "8000:8000",
+                "local-text-gen:latest"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "group": "build",
+            "command": "docker",
+            "problemMatcher": []
+        }
+    ]
+}
