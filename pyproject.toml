@@ -9,12 +9,10 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10"
-torch = "^2.2.1"
 flask = "^3.0.2"
 gunicorn = "^21.2.0"
-transformers = "^4.38.2"
-safetensors = "^0.4.2"
 langchain = "^0.1.12"
+llama-cpp-python = "^0.2.56"
 
 
 [build-system]

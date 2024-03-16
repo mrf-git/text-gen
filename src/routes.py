@@ -1,12 +1,11 @@
-from http import HTTPStatus
-import json
-import time
-import zoneinfo
+import os
+import textwrap
+
 import models
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from html import escape
-from flask import Flask, make_response, request, abort, Response
+from flask import Flask, make_response, request, abort
 
 
 
@@ -23,8 +22,14 @@ RESP_TEMPLATE = """
 </div>
 """
 
-with open("/app/src/index.html", "rb") as f_in:
+WRAP_AMOUNT = 40
+
+with open(os.environ["INDEX_HTML_PATH"], "rb") as f_in:
     INDEX_HTML = f_in.read()
+
+
+if os.getenv("PRELOAD_MODELS", "false") == "true":
+    models.load_models()
 
 
 @app.route("/", methods = ["GET"])
@@ -42,7 +47,8 @@ def format_prompt():
     if not writer_message:
         abort(400)
     
-    out_message = escape(writer_message)
+    ret = textwrap.fill(writer_message, WRAP_AMOUNT)
+    out_message = escape(ret)
     cur_time_str = datetime.now().astimezone().strftime("%H:%M")
 
     response = make_response(RESP_TEMPLATE.format(who="You", writer_class="writer-user",
@@ -58,35 +64,13 @@ def submit_prompt():
     if not writer_message:
         abort(400)
 
-    
     ret = models.CONVERSATION.predict(input=writer_message)
-    print(ret)
-    print(type(ret))
-    print(dir(ret))
 
-    out_message = escape(writer_message)
+    ret = textwrap.fill(ret, WRAP_AMOUNT)
+    out_message = escape(ret)
     cur_time_str = datetime.now().astimezone().strftime("%H:%M")
 
     response = make_response(RESP_TEMPLATE.format(who="Bot", writer_class="",
                                                   msg=out_message, time_str=cur_time_str))
     response.headers.set("Content-Type", "text/html")
     return response
-
-
-
-    # resp = {
-    #     "resp:addMessages": {
-    #         "messages": [
-    #             writer_message
-    #         ]
-    #     }
-    # }
-
-    # resp_str = json.dumps(resp)
-    # print(resp_str)
-
-    # response = Response(None, HTTPStatus.NO_CONTENT, content_type="application/json")
-    # print(response)
-    # response.headers.set("HX-Trigger", resp_str)
-    # print(response)
-    # return response
