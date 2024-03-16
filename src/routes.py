@@ -1,48 +1,76 @@
+import os
+import textwrap
+
 import models
 
+from datetime import datetime
+from html import escape
 from flask import Flask, make_response, request, abort
+
 
 
 app = Flask(__name__)
 
+RESP_TEMPLATE = """
+<div class="chat-message-group {writer_class}">
+    <div class="chat-messages">
+        <div class="message custom-scroll overflowing">
+            <pre class="bubble-content">{msg}</pre>
+        </div>
+        <div class="from">{who} {time_str}</div>
+    </div>
+</div>
+"""
 
-with open("/app/src/index.html", "rb") as f_in:
+WRAP_AMOUNT = 40
+
+with open(os.environ["INDEX_HTML_PATH"], "rb") as f_in:
     INDEX_HTML = f_in.read()
+
+
+if os.getenv("PRELOAD_MODELS", "false") == "true":
+    models.load_models()
 
 
 @app.route("/", methods = ["GET"])
 def index():
+    models.load_conversation()
     response = make_response(INDEX_HTML)
     response.headers.set("Content-Type", "text/html")
     return response
 
 
-@app.route("/prompt", methods = ["POST"])
-def prompt_generate():
+@app.route("/format-prompt", methods = ["POST"])
+def format_prompt():
 
-    system_prompt = request.form.get("system_prompt")
-    user_prompt = request.form.get("user_prompt")
-    if not system_prompt or not user_prompt:
+    writer_message = request.form.get("writerMessage")
+    if not writer_message:
+        abort(400)
+    
+    ret = textwrap.fill(writer_message, WRAP_AMOUNT)
+    out_message = escape(ret)
+    cur_time_str = datetime.now().astimezone().strftime("%H:%M")
+
+    response = make_response(RESP_TEMPLATE.format(who="You", writer_class="writer-user",
+                                                  msg=out_message, time_str=cur_time_str))
+    response.headers.set("Content-Type", "text/html")
+    return response
+
+
+@app.route("/submit-prompt", methods = ["POST"])
+def submit_prompt():
+
+    writer_message = request.form.get("writerMessage")
+    if not writer_message:
         abort(400)
 
-    messages = [
-        {
-            "role": "system",
-            "content": system_prompt,
-        },
-        {
-            "role": "user",
-            "content": user_prompt,
-        },
-    ]
+    ret = models.CONVERSATION.predict(input=writer_message)
 
-    tok_prompt = models.TOKENIZER.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    outputs = models.MODEL_PIPELINE(tok_prompt, max_new_tokens=256, do_sample=True, temperature=0.7, top_k=50, top_p=0.95)
-    out = str(outputs[0]["generated_text"])
+    ret = textwrap.fill(ret, WRAP_AMOUNT)
+    out_message = escape(ret)
+    cur_time_str = datetime.now().astimezone().strftime("%H:%M")
 
-    text = out.split("<|assistant|>")[1]
-    resp = "<pre style=\"width:600px;overflow:auto\">%s</pre>" % text
-
-    response = make_response(resp)
+    response = make_response(RESP_TEMPLATE.format(who="Bot", writer_class="",
+                                                  msg=out_message, time_str=cur_time_str))
     response.headers.set("Content-Type", "text/html")
     return response

@@ -18,7 +18,7 @@
             "type": "shell",
             "args": [
                 "build",
-                "-t", "text-gen-base:latest",
+                "-t", "text-gen-base-cpu:latest",
                 "."
             ],
             "options": {
@@ -33,7 +33,7 @@
             "type": "shell",
             "args": [
                 "build",
-                "-t", "local-text-gen:latest",
+                "-t", "local-text-gen-cpu:latest",
                 "."
             ],
             "options": {
@@ -51,15 +51,34 @@
             "args": [
                 "run",
                 "-it", "--rm",
-                "--gpus=all",
                 "-p", "8000:8000",
-                "local-text-gen:latest"
+                "local-text-gen-cpu:latest"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
             "group": "build",
             "command": "docker",
+            "problemMatcher": []
+        },
+        {
+            "label": "Run flask win dev",
+            "type": "shell",
+            "args": [
+                "run",
+                "--port", "8000"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/src",
+                "env": {
+                    "FLASK_APP": "routes:app",
+                    "MODEL_PATH": "${workspaceFolder}/base_image/models/Llama-2-7B-Chat-GGUF/llama-2-7b-chat.Q4_K_M.gguf",
+                    "INDEX_HTML_PATH": "${workspaceFolder}/src/index.html",
+                    "PRELOAD_MODELS": "true"
+                }
+            },
+            "group": "build",
+            "command": "${workspaceFolder}/.venv/Scripts/flask.exe",
             "problemMatcher": []
         }
     ]
