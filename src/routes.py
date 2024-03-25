@@ -30,6 +30,8 @@ with open(os.environ["INDEX_HTML_PATH"], "rb") as f_in:
 
 if os.getenv("PRELOAD_MODELS", "false") == "true":
     models.load_models()
+    from conversation import load_conversation_chain
+    load_conversation_chain()
 
 
 @app.route("/", methods = ["GET"])

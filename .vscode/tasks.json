@@ -18,7 +18,7 @@
             "type": "shell",
             "args": [
                 "build",
-                "-t", "text-gen-base-cpu:latest",
+                "-t", "text-gen-base-mistral-cpu:latest",
                 "."
             ],
             "options": {
@@ -72,7 +72,7 @@
                 "cwd": "${workspaceFolder}/src",
                 "env": {
                     "FLASK_APP": "routes:app",
-                    "MODEL_PATH": "${workspaceFolder}/base_image/models/Llama-2-7B-Chat-GGUF/llama-2-7b-chat.Q4_K_M.gguf",
+                    "MODEL_PATH": "${workspaceFolder}/base_image/models/Mistral-7B-Instruct-v0.2/mistral-7b-instruct-v0.2.Q5_K_S.gguf",
                     "INDEX_HTML_PATH": "${workspaceFolder}/src/index.html",
                     "PRELOAD_MODELS": "true"
                 }
